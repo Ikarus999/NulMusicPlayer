@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Null Music Player</string>
+    <string name="currently_vibing_to">Hello There</string>
+    <string name="placeholder_length">0:00</string>
+    <string name="track_name">Track Name</string>
+    <string name="my_music">My Music</string>
+    <string name="_0_0">0_0</string>
+</resources>
