@@ -39,8 +39,6 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
     SeekBar playbackSeek;
     Boolean success = false;
     /**TODO
-     * Integrate shuffle and repeat properly
-     * add rewind and forward
      * modify the UI
      */
     private Handler mHandler = new Handler();
