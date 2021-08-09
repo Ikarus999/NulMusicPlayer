@@ -12,11 +12,13 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.bullhead.equalizer.DialogEqualizerFragment;
 import com.example.nullmusicplayer.Utils.AppUtils;
 import com.example.nullmusicplayer.constants.AppConstants;
 
@@ -30,11 +32,17 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
     private MediaPlayer mediaPlayer;
     private static final int PERMISSION_REQUESTS = 1;
     private DJ dj;
-    TextView musicTitleText, songNameText, songLengthText, songProgressText;
-    ImageView playButton, nextButton, previousButton, shuffleButton, repeatButton, randomImageSelectionView, playlistButton;
-    SeekBar playbackSeek;
-    Boolean success;
+    View rewindView,forwardsView;
 
+    TextView musicTitleText, songNameText, songLengthText, songProgressText;
+    ImageView playButton, nextButton, previousButton, shuffleButton, repeatButton, randomImageSelectionView, playlistButton,equalizerButton;
+    SeekBar playbackSeek;
+    Boolean success = false;
+    /**TODO
+     * Integrate shuffle and repeat properly
+     * add rewind and forward
+     * modify the UI
+     */
     private Handler mHandler = new Handler();
     private int seekForwardTime = 5000; // 5000 milliseconds
     private int seekBackwardTime = 5000; // 5000 milliseconds
@@ -66,6 +74,9 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
         dj = new DJ();
         appUtils = new AppUtils();
         setContentView(R.layout.activity_main);
+        rewindView = findViewById(R.id.rewindButton);
+        forwardsView = findViewById(R.id.forwardsButton);
+        equalizerButton = findViewById(R.id.equalizer);
         playlistButton = findViewById(R.id.playlistButton);
         songNameText = findViewById(R.id.songNameText);
         songLengthText = findViewById(R.id.trackLength);
@@ -86,16 +97,63 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
                 finish();
                 Intent i = new Intent(MainActivity.this, MainActivity.class);
                 startActivity(i);
-            } else {
-                finish();
-                finishAffinity();
-                System.exit(0);
             }
+//            else {
+//                finish();
+//                finishAffinity();
+//                System.exit(0);
+//            }
 
         }
 
         songsList = dj.getPlayList(Environment.getStorageDirectory().getPath());
-
+        rewindView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // get current song position
+                int currentPosition = mediaPlayer.getCurrentPosition();
+                // check if seekBackward time is greater than 0 sec
+                if(currentPosition - seekBackwardTime >= 0){
+                    // forward song
+                    mediaPlayer.seekTo(currentPosition - seekBackwardTime);
+                    Toast.makeText(MainActivity.this,"Rewinding!",Toast.LENGTH_SHORT).show();
+                }else{
+                    // backward to starting position
+                    mediaPlayer.seekTo(0);
+                    Toast.makeText(MainActivity.this,"Rewinding!",Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        forwardsView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int currentPosition = mediaPlayer.getCurrentPosition();
+                // check if seekForward time is lesser than song duration
+                if(currentPosition + seekForwardTime <= mediaPlayer.getDuration()){
+                    // forward song
+                    mediaPlayer.seekTo(currentPosition + seekForwardTime);
+                    Toast.makeText(MainActivity.this,"Skipping ahead!",Toast.LENGTH_SHORT).show();
+                }else{
+                    // forward to end position
+                    mediaPlayer.seekTo(mediaPlayer.getDuration());
+                    Toast.makeText(MainActivity.this,"Skipping ahead!",Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        equalizerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DialogEqualizerFragment fragment = DialogEqualizerFragment.newBuilder()
+                        .setAudioSessionId(mediaPlayer.getAudioSessionId())
+                        .themeColor(ContextCompat.getColor(MainActivity.this, R.color.primaryColor))
+                        .textColor(ContextCompat.getColor(MainActivity.this, R.color.primaryTextColor))
+                        .accentAlpha(ContextCompat.getColor(MainActivity.this, R.color.secondaryLightColor))
+                        .darkColor(ContextCompat.getColor(MainActivity.this, R.color.primaryDarkColor))
+                        .setAccentColor(ContextCompat.getColor(MainActivity.this, R.color.secondaryColor))
+                        .build();
+                fragment.show(getSupportFragmentManager(), "eq");
+            }
+        });
 
 //        songsList = dj.getPlayList(Environment.getStorageDirectory().getPath());
         playlistButton.setOnClickListener(new View.OnClickListener() {
@@ -133,13 +191,29 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
             @Override
             public void onClick(View v) {
                 // check if next song is there or not
-                if (currentSongIndex < (songsList.size() - 1)) {
-                    playSong(currentSongIndex + 1);
-                    currentSongIndex = currentSongIndex + 1;
+                // check for repeat is ON or OFF
+                if (isRepeat) {
+                    // repeat is on play same song again
+                    repeatButton.setColorFilter(ContextCompat.getColor(getApplicationContext(), R.color.secondaryLightColor), android.graphics.PorterDuff.Mode.SRC_IN);
+                    playSong(currentSongIndex);
+                } else if (isShuffle) {
+
+                    shuffleButton.setColorFilter(ContextCompat.getColor(getApplicationContext(), R.color.secondaryLightColor), android.graphics.PorterDuff.Mode.SRC_IN);
+
+                    // shuffle is on - play a random song
+                    Random rand = new Random();
+                    currentSongIndex = rand.nextInt((songsList.size() - 1) - 0 + 1) + 0;
+                    playSong(currentSongIndex);
                 } else {
-                    // play first song
-                    playSong(0);
-                    currentSongIndex = 0;
+                    // no repeat or shuffle ON - play next song
+                    if (currentSongIndex < (songsList.size() - 1)) {
+                        playSong(currentSongIndex + 1);
+                        currentSongIndex = currentSongIndex + 1;
+                    } else {
+                        // play first song
+                        playSong(0);
+                        currentSongIndex = 0;
+                    }
                 }
 
 

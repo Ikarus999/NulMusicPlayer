@@ -181,4 +181,32 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/songNameText"
         android:gravity="center_horizontal" />
+
+    <View
+        android:id="@+id/rewindButton"
+        android:layout_width="@dimen/_50sdp"
+        android:layout_height="@dimen/_50sdp"
+        android:layout_marginBottom="140dp"
+        app:layout_constraintBottom_toBottomOf="@+id/randomImageSelection"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <View
+        android:id="@+id/forwardsButton"
+        android:layout_width="@dimen/_50sdp"
+        android:layout_height="@dimen/_50sdp"
+        android:layout_marginBottom="140dp"
+        app:layout_constraintBottom_toBottomOf="@+id/randomImageSelection"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <ImageView
+        android:id="@+id/equalizer"
+        android:layout_width="@dimen/_30sdp"
+        android:layout_height="@dimen/_30sdp"
+        android:layout_marginTop="@dimen/_15sdp"
+        android:layout_marginLeft="@dimen/_15sdp"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:src="@drawable/round_graphic_eq_24"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/secondaryColor" />
 </androidx.constraintlayout.widget.ConstraintLayout>
